@@ -5,7 +5,7 @@ var image = require("./app/image.js");
 var urban = require("./app/urban.js");
 
 //start shit upp
-login({email: "stupidthrowaway41234@gmail.com", password: "asdfqwer123"}, function callback (err, api) {
+login({email: "", password: ""}, function callback (err, api) {
     if(err) return console.error(err);
     console.log("ready");
     // var myID = api.getCurrentUserId();

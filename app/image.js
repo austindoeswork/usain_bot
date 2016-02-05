@@ -57,11 +57,11 @@ function search(strings,api,thread_id,end) {
 	});
 }
 
-function searchgif(strings,api,thread_id,end) {
+function searchgif(strings,api,thread_id) {
 
 	if(!strings.length){
 		api.sendMessage({body: "usage:\n /img <string>"}, thread_id, function(){
-			end();
+			// end();
 			return;
 		});
 		return;
@@ -73,7 +73,7 @@ function searchgif(strings,api,thread_id,end) {
 	}
 
 	if(totalString.indexOf("#") != -1){
-		end();
+		// end();
 		api.sendMessage({body: "no hashtags in a command"}, thread_id, function(){});
 		return;
 	}
@@ -84,7 +84,7 @@ function searchgif(strings,api,thread_id,end) {
 		if(!gifs.data[0]){
 			console.log("/gif failed");
 			api.sendMessage({body: "gif failed for "+strings[0]+"..."}, thread_id, function(){
-				end();
+				// end();
 				return;
 			});
 			return;
@@ -92,15 +92,15 @@ function searchgif(strings,api,thread_id,end) {
 		var url = gifs.data[0].images.fixed_height_small.url;
 		var stream = request(url);
 
-		api.sendMessage({attachment: stream}, thread_id, function(err){
+		api.sendMessage({attachment: [stream]}, thread_id, function(err){
 			if(err){
 				console.log("/gif failed");
 				api.sendMessage({body: "gif failed for "+strings[0]+"..."}, thread_id, function(){});
-				end();
+				// end();
 				return;
 			}
 			console.log("/gif sent");
-			end();
+			// end();
 			return;
 		});
 		return;

@@ -4,16 +4,18 @@ var login = require("facebook-chat-api");
 var image = require("./app/image.js");
 var urban = require("./app/urban.js");
 
+
+//playing with connect 4, temporary
 var board = new Array(6);
 for (var i = 0; i < 6; i++) {
   board[i] = ['  ','  ','  ','  ','  ','  ','  '];
 }
-
 var turn1 = true;
+//TODO: create multiple tables for multiple chats
 
 function start(){
-//start shit upp
-login({email: "", password: ""}, function callback (err, api) {
+//start it upp
+login({email: "stupidthrowaway41234@gmail.com", password: "asdfqwer123"}, function callback (err, api) {
     if(err) return console.error(err);
 
     api.setOptions({listenEvents: true});
@@ -61,95 +63,10 @@ login({email: "", password: ""}, function callback (err, api) {
         }
     });
 
-    // if(err){
-    //     console.log(err);
-    //     restart();
-    //     return;    
-    // }
-    // console.log("ready");
-    // // var myID = api.getCurrentUserId();
-
-    // // api.getUserInfo(myID,function(err,obj){
-    // //  console.log(obj);
-    // // });
-    // api.listen(function callback(err, message) {
-    //     if(err) console.log(err);
-    //     if(message.body && message.body[0] === "/"){
-    //         var mes = message.body.split(" ");
-
-
-    //         if(mes[0] === "/c4"){
-    //             connect4(message);
-    //         }
-    //         if(mes[0] === "/img"){
-    //             api.sendTypingIndicator(message.thread_id,function(err,end){
-    //                 image.search(mes.slice(1), api, message.thread_id,end);
-    //             });
-    //         }
-    //         if(mes[0] === "/gif"){
-    //                 image.searchgif(mes.slice(1), api, message.thread_id,end);
-    //         }
-    //         if(mes[0] === "/urb"){
-    //                 urban.search(mes.slice(1), api, message.thread_id);
-    //         }
-    //         if(mes[0] === "/swag"){
-    //             api.sendMessage({body: "swiggity"+"..."}, message.thread_id, function(){
-    //             return;
-    //         });
-    //         }
-    //         if(mes[0] === "/dev"){
-    //             if(mes[1] === "-restart"){
-    //                 restart();
-    //                 return;
-    //             }
-    //             if(mes[1] === "-peeps"){
-    //                 var peepers = "online:\n";
-    //                 var peeps = message.participant_names;
-    //                 for(var peep in peeps){
-    //                     if(peeps[peep] === "Austins") continue;
-    //                     peepers += peeps[peep] + "\n";
-    //                 }
-    //                 api.sendMessage({body: peepers}, message.thread_id, function(){});
-    //             }
-    //             if(mes[1] === "-name"){
-    //                 var name = "";
-    //                 for(var i = 2; i<mes.length; i++){
-    //                     name += mes[i] + " ";
-    //                 }
-    //                 api.setTitle(name,message.thread_id,function(err){
-    //                     if (err){api.sendMessage({body: "not a groop chat"}, message.thread_id, function(){});}
-    //                 });
-    //             }
-    //             if(mes[1] === "-info"){
-    //                 api.getUserInfo(message.participant_ids,function(err,ret){
-    //                     console.log(ret);
-    //                 });
-    //             }
-    //             if(mes[1] === "-bio"){
-    //                 api.getUserInfo(message.participant_ids,function(err,ret){
-    //                     console.log(ret);
-    //                 });
-    //             }
-
-    //                 // api.getUserInfo([1, 2, 3, 4], function(err, ret) {
-    //                 //   if(err) return console.error(err);
-                 
-    //                 //   for(var prop in ret) {
-    //                 //     if(ret.hasOwnProperty(prop) && ret[prop].is_birthday) {
-    //                 //       api.sendMessage("Happy birthday :)", prop);
-    //                 //     }
-    //                 //   }
-    //                 // });
-    //             // console.log(message);
-    //             // api.sendMessage({body: message}, message.thread_id, function(){});
-    //         }
-    //     }
-    //     // console.log(message.body);
-    //     // api.sendMessage(message.body, message.thread_id);
-    // });
 });
 }
 
+//TODO: Move this to a seperate file, clean up
 // connect4(mes.slice(1), api, event.threadID);
 function connect4(mes,api,threadID){
     console.log("/c4:" + mes);
@@ -169,26 +86,24 @@ function connect4(mes,api,threadID){
     }
 
     addPiece(mes[0],function(success){
-        if(success){
+        if(success == 1){
             displayBoard(api,threadID);
         }
-        else{
+        else if (success == -1){
             api.sendMessage({body:"invalid move."}, threadID);
         }
+        else {
+            displayBoard(api,threadID);
+            api.sendMessage({body:"winnnnnnn."}, threadID);
+        }
     });
-    // board[mes[0]][mes[1]] = parseInt(mes[2]);
-    // displayBoard(api,threadID);
-    // for(var j=0; j<6; j++){
-    //         console.log(board[j]);
-    // }
-
     console.log("\n");
     
 }
 
 function addPiece(col,cb){
     if(col < 0 || col > 6){
-        cb(false);
+        cb(-1);
         return;
     }
     var piece;
@@ -203,7 +118,7 @@ function addPiece(col,cb){
     var row = 5;
     while(!empty){
         if (row < 0){
-            cb(false);
+            cb(-1);
             return;
         }
         if(board[row][col] == '  '){
@@ -213,9 +128,39 @@ function addPiece(col,cb){
             row--;
         }
     }
+
     board[row][col] = piece;
     turn1 = !turn1; 
-    cb(true);
+    checkwin(row,col,piece,function(won){
+        if(won){
+            cb(0);
+        }
+        else {
+            cb(1);
+        }
+    });
+}
+
+function checkwin(row,col,piece,cb){
+    var count = 0;  
+    var r = row;
+    var c = col;
+    var tile = board[row][col];
+    //veerticle
+    //get to the top
+    console.log("checking vertical win for "+piece);
+    console.log('count:'+count + ' r:'+r + ' current:' + board[row][col]);
+    while(count < 3 && piece == board[r][c] && r < 5){
+        count++;
+        r++;
+        console.log('r='+r);
+    }
+    if(count == 3){
+        cb(true);
+    }
+    else{
+        cb(false);
+    }
 }
 
 function displayBoard(api,threadID){
